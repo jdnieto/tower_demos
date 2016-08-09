@@ -1,0 +1,6 @@
+- hosts: mysql
+  roles:
+    - { role: mysql,
+        mysql_root_user: root,
+        mysql_root_password: redhat }
+

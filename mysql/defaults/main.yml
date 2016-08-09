@@ -1,0 +1,6 @@
+---
+# defaults file for mysql-server
+proxy_env: { }
+
+mysql_root_user: root
+mysql_root_password: redhat
