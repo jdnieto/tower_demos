@@ -1,18 +1,16 @@
 ---
 - hosts: mysql
+  become: yes
+  become_user: root
   vars:
     mysql_root_user: root
     mysql_root_password: redhat
 
   tasks:
   - name: install MySQL
-    become: yes
-    become_user: root
     yum: name=mysql-server state=present
 
   - name: ensure MySQL starts on boot
-    become: yes
-    become_user: root
     service: name=mysqld enabled=yes state=started
 
   - name: lock down root user
