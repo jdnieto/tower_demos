@@ -8,10 +8,13 @@
 
   tasks:
   - name: install MySQL
-    yum: name=mysql-server state=present
+    yum: name={{ item }} state=present
+    with_items:
+    - MySQL-python
+    - mariadb-server
 
   - name: ensure MySQL starts on boot
-    service: name=mysqld enabled=yes state=started
+    service: name=mariadb enabled=yes state=started
 
   - name: lock down root user
     mysql_user:
