@@ -1,0 +1,6 @@
+[elk]
+vm35 elktype=logstash
+vm36 elktype=kibana
+vm37 elktype=elastic
+vm38 elktype=elastic
+vm39 elktype=elastic

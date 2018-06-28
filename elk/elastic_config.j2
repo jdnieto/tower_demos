@@ -1,0 +1,9 @@
+node.name: {{ ansible_nodename }}
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+network.host: {{ ansible_default_ipv4.address }}
+http.port: 9200
+discovery.zen.minimum_master_nodes: 1
+discovery.zen.ping.unicast.hosts: [“172.27.4.36","172.27.4.37","172.27.4.38","172.27.4.39"]
+#bootstrap.memory_lock: true
+bootstrap.memory_lock: false

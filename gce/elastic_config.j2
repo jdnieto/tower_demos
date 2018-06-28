@@ -1,0 +1,10 @@
+node.name: {{ gce_name }}
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+network.host: {{ gce_private_ip }}
+http.port: 9200
+discovery.zen.minimum_master_nodes: 1
+#discovery.zen.ping.unicast.hosts: [“kibana","elastic1","elastic2","elastic3"]
+discovery.zen.ping.unicast.hosts: [“10.128.0.3","10.128.0.4","10.128.0.5","10.128.0.6"]
+#bootstrap.memory_lock: true
+bootstrap.memory_lock: false

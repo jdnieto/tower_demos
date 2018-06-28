@@ -1,10 +1,10 @@
 ---
-- hosts: all
+- hosts: mysql
   become: yes
   become_user: root
   vars:
     mysql_root_user: root
-    mysql_root_password: redhat
+    mysql_root_password: password
 
   tasks:
   - name: install MySQL

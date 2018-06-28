@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  gather_facts: no
+
+  tasks:
+    - name: handle instance
+      gce:
+        instance_names: "{{ gce_instance }}"
+        zone: "{{ gce_zone }}"
+        machine_type: "{{ gce_machine }}"
+        image: "{{ gce_image }}"
+        state: "{{ gce_state }}"
+
+  

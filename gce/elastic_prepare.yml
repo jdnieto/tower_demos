@@ -1,0 +1,85 @@
+---
+- hosts: all
+  remote_user: root
+  gather_facts: no
+  
+  vars_files:
+  - logstash_vars.yml
+
+  tasks:
+  - name: Import Elastic Key
+    rpm_key:
+      state: present
+      key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+  - name: Copy elastic repo
+    copy: src=elastic.repo dest=/etc/yum.repos.d/elastic.repo owner=root group=root mode=0644
+
+  - name: Copy hosts file
+    copy: src=hosts dest=/etc/hosts owner=root group=root mode=0644
+
+  - name: Clean Repos
+    command: yum clean all
+
+  - name: Update
+    yum: name=* state=latest
+
+  - name: Install JDK
+    yum: name=java-1.8.0-openjdk state=latest
+
+  - name: Install Elasticsearch
+    yum: name=elasticsearch state=present
+    when: not gce_name=="logstash"
+
+  - name: Install Logstash
+    yum: name=logstash state=present
+    when: gce_name=="logstash"
+
+  - name: Install Kibana
+    yum: name=kibana state=present
+    when: gce_name=="kibana"
+
+  - name: Copy config file
+    template: src=elastic_config.j2  dest=/etc/elasticsearch/elasticsearch.yml owner=root group=root mode=0644
+    when: not gce_name=="logstash"
+
+  - name: Set Elasticsearch Nodes
+    blockinfile:
+      path: /etc/elasticsearch/elasticsearch.yml
+      block: |
+        node.master: false
+        node.data: true
+    when: not gce_name=="logstash" and not gce_name=="kibana"
+
+  - name: Set Elasticsearch Master
+    blockinfile:
+      path: /etc/elasticsearch/elasticsearch.yml
+      block: |
+        node.master: true
+        node.data: false
+    when: gce_name=="kibana"
+
+  - name: Start Elasticsearch 
+    service: name=elasticsearch state=restarted enabled=yes
+    when: not gce_name=="logstash"
+        
+  - name: Copy Kibana config file
+    template: src=kibana.j2  dest=/etc/kibana/kibana.yml owner=root group=root mode=0644
+    when: gce_name=="kibana"
+
+  - name: Start Kibana Service
+    service: name=kibana state=restarted enabled=yes
+    when: gce_name=="kibana"
+
+  - name: Copy Logstash config file
+    template: src=logstash.j2  dest=/etc/logstash/conf.d/twitter.conf owner=root group=root mode=0644
+    when: gce_name=="logstash"
+
+  - name: Copy Template
+    copy: src=twitter_template.json dest=/etc/logstash/twitter_template.json owner=root group=root mode=0644
+    when: gce_name=="logstash"
+
+  - name: Start Logastash Service
+    service: name=logstash state=restarted enabled=yes
+    when: gce_name=="logstash"
+
