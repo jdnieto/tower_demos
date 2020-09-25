@@ -1,0 +1,35 @@
+vmdir: /var/lib/libvirt/images/pocs/
+diskdir: /var/lib/libvirt/images/pocs/
+template_disk: /var/lib/libvirt/images/pocs/centos8_base_david.qcow2
+vmnet:
+  net: 192.168.133
+  netname: ELK
+  basemac: 52:54:00:4a:12
+  gateway: 192.168.133.1
+  netmask: 255.255.255.0
+  domain: elk.lan
+qemu:
+  machine: pc-i440fx-2.3
+  cpu: SandyBridge
+  emulator: /usr/bin/qemu-kvm
+vms:
+  tower:
+    id: 10
+    cpu: 2
+    mem: 4194304
+  vm1:
+    id: 31
+    cpu: 1
+    mem: 2097152
+  vm2:
+    id: 32
+    cpu: 1
+    mem: 2097152
+  vm3:
+    id: 33
+    cpu: 1
+    mem: 2097152
+  vm4:
+    id: 34
+    cpu: 1
+    mem: 2097152
