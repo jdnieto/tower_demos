@@ -1,6 +1,0 @@
-127.0.0.1 localhost localhost.localdomain
-10.128.0.2 logstash
-10.128.0.3 kibana
-10.128.0.4 elastic1
-10.128.0.5 elastic2
-10.128.0.6 elastic3

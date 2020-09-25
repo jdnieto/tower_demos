@@ -10,10 +10,15 @@ input {
 }
 
 filter { }
-
+{% set machines = [] -%}
+{% for key, value in vms.items() -%}
+{% if 'elastic' in key -%}
+{{ machines.append( key + '.' + vmnet.domain + ':9200') or ''}}
+{%- endif %}
+{%- endfor %}
 output {
     elasticsearch {
-      hosts => ["vm37:9200","vm38:9200","vm39:9200"]
+      hosts => {{ machines }}
       index         => "twitter_elastic_example"
       document_type => "tweets"
       template      => "/etc/logstash/twitter_template.json"

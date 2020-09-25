@@ -1,6 +1,0 @@
-127.0.0.1 localhost localhost.localdomain
-172.27.4.35 logstash
-172.27.4.36 kibana
-172.27.4.37 elastic1
-172.27.4.38 elastic2
-172.27.4.39 elastic3

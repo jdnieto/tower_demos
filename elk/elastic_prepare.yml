@@ -1,10 +1,9 @@
 ---
-- hosts: all
+- name: Create ELK cluster
+  hosts: all
   remote_user: root
-  
   vars_files:
-  - logstash_vars.yml
-
+    - logstash_vars.yml
   tasks:
   - name: Import Elastic Key
     rpm_key:
@@ -12,44 +11,60 @@
       key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
 
   - name: Copy elastic repo
-    copy: src=elastic.repo dest=/etc/yum.repos.d/elastic.repo owner=root group=root mode=0644
-
-  - name: Copy hosts file
-    copy: src=elkhosts dest=/etc/hosts owner=root group=root mode=0644
+    copy: 
+      src: elastic.repo 
+      dest: /etc/yum.repos.d/elastic.repo 
+      owner: root 
+      group: root 
+      mode: 0644
   
   - name: Clean Repos
     command: yum clean all
 
   - name: Update
-    yum: name=* state=latest
+    yum: 
+      name: '*' 
+      state: latest
 
   - name: Install JDK
-    yum: name=java-1.8.0-openjdk state=latest
+    yum: 
+      name: java-1.8.0-openjdk 
+      state: latest
 
   - name: Install Elasticsearch
-    yum: name=elasticsearch state=present
-    when: not elktype=="logstash"
+    yum: 
+      name: elasticsearch 
+      state: present
+    when: "'logstash' not in inventory_hostname"
 
   - name: Install Logstash
-    yum: name=logstash state=present
-    when: elktype=="logstash"
+    yum: 
+      name: logstash 
+      state: present
+    when: "'logstash' in inventory_hostname"
 
   - name: Install Kibana
-    yum: name=kibana state=present
-    when: elktype=="kibana"
+    yum: 
+      name: kibana state=present
+    when: "'kibana' in inventory_hostname"
 
   - name: Stop Firewall
     service:
       name: firewalld
       state: stopped
-      enabled: no
+      enabled: false
 
   - name: Flush rules
     command: iptables -F    
 
   - name: Copy config file
-    template: src=elastic_config.j2  dest=/etc/elasticsearch/elasticsearch.yml owner=root group=root mode=0644
-    when: not elktype=="logstash"
+    template: 
+      src: elastic_config.j2  
+      dest: /etc/elasticsearch/elasticsearch.yml 
+      owner: root 
+      group: root
+      mode: 0644
+    when: "'logstash' not in inventory_hostname"
 
   - name: Set Elasticsearch Nodes
     blockinfile:
@@ -57,7 +72,7 @@
       block: |
         node.master: false
         node.data: true
-    when: not elktype=="logstash" and not elktype=="kibana"
+    when: "'elastic' in inventory_hostname"
 
   - name: Set Elasticsearch Master
     blockinfile:
@@ -65,29 +80,52 @@
       block: |
         node.master: true
         node.data: false
-    when: elktype=="kibana"
+    when: "'kibana' in inventory_hostname"
 
   - name: Start Elasticsearch 
-    service: name=elasticsearch state=restarted enabled=yes
-    when: not elktype=="logstash"
+    service: 
+      name: elasticsearch
+      state: restarted
+      enabled: true
+    when: "'logstash' not in inventory_hostname"
         
   - name: Copy Kibana config file
-    template: src=kibana.j2  dest=/etc/kibana/kibana.yml owner=root group=root mode=0644
-    when: elktype=="kibana"
+    template: 
+      src: kibana.j2
+      dest: /etc/kibana/kibana.yml
+      owner: root
+      group: root
+      mode: 0644
+    when: "'kibana' in inventory_hostname"
 
   - name: Start Kibana Service
-    service: name=kibana state=restarted enabled=yes
-    when: elktype=="kibana"
-
+    service: 
+      name: kibana
+      state: restarted
+      enabled: true
+    when: "'kibana' in inventory_hostname"
+    
   - name: Copy Logstash config file
-    template: src=logstash.j2  dest=/etc/logstash/conf.d/twitter.conf owner=root group=root mode=0644
-    when: elktype=="logstash"
+    template: 
+      src: logstash.j2
+      dest: /etc/logstash/conf.d/twitter.conf
+      owner: root
+      group: root
+      mode: 0644
+    when: "'logstash' in inventory_hostname"
 
   - name: Copy Template
-    copy: src=twitter_template.json dest=/etc/logstash/twitter_template.json owner=root group=root mode=0644
-    when: elktype=="logstash"
-
+    copy: 
+      src: twitter_template.json
+      dest: /etc/logstash/twitter_template.json
+      owner: root
+      group: root
+      mode: 0644
+    when: "'logstash' in inventory_hostname"
+    
   - name: Start Logastash Service
-    service: name=logstash state=restarted enabled=yes
-    when: elktype=="logstash"
-
+    service: 
+      name: logstash
+      state: restarted
+      enabled: true
+    when: "'logstash' in inventory_hostname"
