@@ -1,0 +1,140 @@
+---
+- name: Create ELK cluster
+  hosts: all
+  remote_user: root
+  vars_files:
+    - vars/logstash_vars.yaml
+    - vars/machines.yaml
+  tasks:
+    - name: Fail if no word defined
+      fail:
+        msg: You need to define tw_keyword variable
+      when: 
+        - tw_keyword is not defined
+        - tw_keyword | length == 0
+
+    - name: Import Elastic Key
+      rpm_key:
+        state: present
+        key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+    - name: Copy elastic repo
+      copy: 
+        src: files/elastic.repo 
+        dest: /etc/yum.repos.d/elastic.repo 
+        owner: root 
+        group: root 
+        mode: 0644
+    
+    - name: Clean Repos
+      command: dnf clean all
+
+    - name: Update
+      dnf: 
+        name: '*' 
+        state: latest
+
+    - name: Install JDK
+      dnf: 
+        name: java-1.8.0-openjdk 
+        state: latest
+
+    - name: Install Elasticsearch
+      dnf: 
+        name: elasticsearch 
+        state: present
+      when: "'logstash' not in inventory_hostname"
+
+    - name: Install Logstash
+      dnf: 
+        name: logstash 
+        state: present
+      when: "'logstash' in inventory_hostname"
+
+    - name: Install Kibana
+      dnf: 
+        name: kibana 
+        state: present
+      when: "'kibana' in inventory_hostname"
+
+    - name: Stop Firewall
+      service:
+        name: firewalld
+        state: stopped
+        enabled: false
+
+    - name: Flush rules
+      command: iptables -F    
+
+    - name: Copy config file
+      template: 
+        src: templates/elastic_config.j2  
+        dest: /etc/elasticsearch/elasticsearch.yml 
+        owner: root 
+        group: root
+        mode: 0644
+      when: "'logstash' not in inventory_hostname"
+
+    - name: Set Elasticsearch Nodes
+      blockinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        block: |
+          node.master: false
+          node.data: true
+      when: "'elastic' in inventory_hostname"
+
+    - name: Set Elasticsearch Master
+      blockinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        block: |
+          node.master: true
+          node.data: false
+      when: "'kibana' in inventory_hostname"
+
+    - name: Start Elasticsearch 
+      service: 
+        name: elasticsearch
+        state: restarted
+        enabled: true
+      when: "'logstash' not in inventory_hostname"
+          
+    - name: Copy Kibana config file
+      template: 
+        src: templates/kibana.j2
+        dest: /etc/kibana/kibana.yml
+        owner: root
+        group: root
+        mode: 0644
+      when: "'kibana' in inventory_hostname"
+
+    - name: Start Kibana Service
+      service: 
+        name: kibana
+        state: restarted
+        enabled: true
+      when: "'kibana' in inventory_hostname"
+      
+    - name: Copy Logstash config file
+      template: 
+        src: templates/logstash.j2
+        dest: /etc/logstash/conf.d/twitter.conf
+        owner: root
+        group: root
+        mode: 0644
+      when: "'logstash' in inventory_hostname"
+
+    - name: Copy Template
+      copy: 
+        src: files/twitter_template.json
+        dest: /etc/logstash/twitter_template.json
+        owner: root
+        group: root
+        mode: 0644
+      when: "'logstash' in inventory_hostname"
+      
+    - name: Start Logastash Service
+      service: 
+        name: logstash
+        state: restarted
+        enabled: true
+      when: "'logstash' in inventory_hostname"

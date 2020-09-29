@@ -1,0 +1,3 @@
+elasticsearch.elk.lan ansible_host=192.168.133.31
+logstash.elk.lan ansible_host=192.168.133.32
+kibana.elk.lan ansible_host=192.168.133.33

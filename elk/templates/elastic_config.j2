@@ -1,7 +1,7 @@
 {% set machines = [] -%}
 {% for key, value in vms.items() -%}
 {% if 'elastic' in key or 'kibana' in key -%}
-{{ machines.append( key + '.' + vmnet.domain + ':9200') or ''}}
+{{ machines.append( vmnet.net + '.' + value.id|string + ':9300') or ''}}
 {%- endif %}
 {%- endfor %}
 node.name: {{ ansible_facts['nodename'] }}
