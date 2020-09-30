@@ -1,6 +1,6 @@
 ---
 - name: Create ELK cluster
-  hosts: all
+  hosts: elk
   remote_user: root
   vars_files:
     - vars/logstash_vars.yaml
