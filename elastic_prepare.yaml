@@ -1,4 +1,11 @@
 ---
+- name: Give it time for deployment
+  hosts: localhost
+  tasks:
+    - name: waiting
+      pause:
+        seconds: 15
+        
 - name: Create ELK cluster
   hosts: elk
   remote_user: root
