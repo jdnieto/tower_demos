@@ -37,10 +37,10 @@
     - name: Clean Repos
       command: dnf clean all
 
-    - name: Update
-      dnf: 
-        name: '*' 
-        state: latest
+#    - name: Update
+#      dnf: 
+#        name: '*' 
+#        state: latest
 
     - name: Install JDK
       dnf: 
